@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 """
   Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
 
@@ -30,10 +30,10 @@ def record(cfg):
         while (run):
             (conn, addr) = sock.accept()
 
-            print "Connected: ",addr
+            print("Connected: ", addr)
 
             if (cfg['router'] and not addr[0] == cfg['router']):
-                print " ... router does not equal %s, skipping" % addr[0]
+                print(" ... router does not equal %s, skipping", addr[0])
                 conn.close()
                 continue
 
@@ -45,13 +45,13 @@ def record(cfg):
 
                     f.write(data)
 
-            print " ...Done"
+            print(" ...Done")
 
             run = False
 
 
     except socket.error as msg:
-        print "ERROR: failed to record: %r" % msg
+        print("ERROR: failed to record: %r", msg)
 
 def play(cfg):
     """ Play BMP messages by sending recorded BMP stream from file to destip/port """
@@ -63,7 +63,7 @@ def play(cfg):
             sock.bind((cfg['router'], 0))
 
         sock.connect((cfg['dest_addr'], cfg['port']))
-        print "Connected, sending data..."
+        print("Connected, sending data...")
 
         with open(cfg['file'], "rb") as f:
             while True:
@@ -74,13 +74,13 @@ def play(cfg):
 
                 data = sock.sendall(data)
                 
-        print " ...Done   press Ctrl-C to close connection"
+        print(" ...Done   press Ctrl-C to close connection")
  
         while True:
            sleep(1)
 
     except socket.error as msg:
-        print "ERROR: failed to play: %r" % msg
+        print("ERROR: failed to play: %r", msg)
             
 
 def parseCmdArgs(argv):
@@ -108,7 +108,7 @@ def parseCmdArgs(argv):
                  'router': None }
 
     if (len(argv) < 3):
-        print "ERROR: Missing required args"
+        print("ERROR: Missing required args")
         usage(argv[0])
         sys.exit(1)
 
@@ -126,7 +126,7 @@ def parseCmdArgs(argv):
                 if (a in ['record', 'play']):
                     cmd_args['mode'] = a
                 else:
-                    print "ERROR: Invalid mode of '%s" % a
+                    print("ERROR: Invalid mode of '%s", a)
                     usage(argv[0])
                     sys.exit(1)
 
@@ -149,20 +149,20 @@ def parseCmdArgs(argv):
                 sys.exit(1)
 
         if (found_req_args < REQUIRED_ARGS):
-            print "ERROR: Missing required args, found %d required %d" % (found_req_args, REQUIRED_ARGS)
+            print("ERROR: Missing required args, found %d required %d", found_req_args, REQUIRED_ARGS)
             usage(argv[0])
             sys.exit(1)
 
         elif (cmd_args['mode'] == 'play'): 
             if (cmd_args['dest_addr'] == None):
-                print "ERROR: play mode requires destination IP arg"
+                print("ERROR: play mode requires destination IP arg")
                 usage(argv[0])
                 sys.exit(1)
 
         return cmd_args
 
-    except (getopt.GetoptError, TypeError), err:
-        print str(err)  # will print something like "option -a not recognized"
+    except (getopt.GetoptError, TypeError) as err:
+        print("%s", str(err)) # will print something like "option -a not recognized"
         usage(argv[0])
         sys.exit(2)
 
@@ -172,20 +172,20 @@ def usage(prog):
 
         :param prog:  Program name
     """
-    print ""
-    print "Usage: %s [OPTIONS]" % prog
-    print ""
+    print("")
+    print("Usage: %s [OPTIONS]", prog)
+    print("")
 
-    print "REQUIRED OPTIONS:"
-    print "  -m, --mode".ljust(30) + "Either 'record' or 'play'"
-    print "  -p, --port".ljust(30) + "TCP Port to listen on or to send to"
-    print "  -f, --file".ljust(30) + "Filename to write to or read from"
-    print "  -d, --destip".ljust(30) + "For play mode; Destination IP address of collector"
-    print ""
+    print("REQUIRED OPTIONS:")
+    print("  -m, --mode".ljust(30) + "Either 'record' or 'play'")
+    print("  -p, --port".ljust(30) + "TCP Port to listen on or to send to")
+    print("  -f, --file".ljust(30) + "Filename to write to or read from")
+    print("  -d, --destip".ljust(30) + "For play mode; Destination IP address of collector")
+    print("")
 
-    print "OPTIONAL OPTIONS:"
-    print "  -h, --help".ljust(30) + "Print this help menu"
-    print "  -r, --router".ljust(30) + "Router IP address to accept (record) or spoof (play)"
+    print("OPTIONAL OPTIONS:")
+    print("  -h, --help".ljust(30) + "Print this help menu")
+    print("  -r, --router".ljust(30) + "Router IP address to accept (record) or spoof (play)")
 
 
 def main():
@@ -195,11 +195,11 @@ def main():
     cfg = parseCmdArgs(sys.argv)
 
     if (cfg['mode'] == 'record'):
-        print "Listening for connection..."
+        print("Listening for connection...")
         record(cfg)
 
     elif (cfg['mode'] == 'play'):
-        print "Sending contents of '%s' to connection to %s" % (cfg['file'], cfg['dest_addr'])
+        print("Sending contents of '%s' to connection to %s", cfg['file'], cfg['dest_addr'])
         play(cfg)
 
 
