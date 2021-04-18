@@ -56,6 +56,33 @@ def record(cfg):
 def play(cfg):
     """ Play BMP messages by sending recorded BMP stream from file to destip/port """
     try:
+	# Some config validations first
+        if cfg['loop'] == None:
+            loopval = 1
+        elif cfg['loop']:
+            loopval = int(cfg['loop'])
+
+	    if (loopval < 0):
+                print("ERROR: Invalid 'loop' value")
+                sys.exit(3)
+
+	    if (loopval == 0 and cfg['keep_open']):
+                print("ERROR: 'keep_open' does not apply to infinite 'loop' value")
+                sys.exit(3)
+        else:
+            loopval = 1
+
+        if cfg['interval'] == None:
+            interval = 0
+        elif cfg['interval']:
+            interval = int(cfg['interval'])
+
+	    if (interval < 0):
+                print("ERROR: Invalid 'interval' value")
+                sys.exit(3)
+        else:
+            interval = 0
+
         sock =  socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         # spoof a router addr if requested, use "net.ipv4.ip_nonlocal_bind=1" as needed 
@@ -65,23 +92,8 @@ def play(cfg):
         sock.connect((cfg['dest_addr'], cfg['port']))
         print("Connected, sending data...")
 
-        if cfg['loop'] == None:
-            loopval = 1
-        elif cfg['loop'] == type(int):
-            loopval = int(cfg['loop'])
-        else:
-            loopval = 1
-
-        if cfg['intervall'] == None:
-            delay=0
-        elif cfg['intervall']:
-            delay=int(cfg['intervall'])
-        else:
-            delay=0
-
-
         if int(cfg['loop']) != 0:
-            print("looping now %s times" % int(cfg['loop']))
+            print("Looping %s times over input file" % int(cfg['loop']))
             for val in range(0, int(cfg['loop'])):
                 sys.stdout.write('.')
                 sys.stdout.flush()
@@ -93,10 +105,10 @@ def play(cfg):
                             break;
         
                         data = sock.sendall(data)
-                sleep(delay)
+                sleep(interval)
 
         else:
-            print("looping now fo ever until signal TERM (loop=%s)" % int(cfg['loop']))
+            print("Looping forever until Ctrl-C")
             while True:
                 sys.stdout.write('.')
                 sys.stdout.flush()
@@ -108,15 +120,14 @@ def play(cfg):
                             break;
         
                         data = sock.sendall(data)
-                sleep(delay)
-               
+                sleep(interval)
                     
-        if cfg['ending'] == None:
-            print("\n...Done   press Ctrl-C to close connection")
+        if cfg['keep_open'] == None:
+            print("\n...Done   Closing connection.")
+        else:
+            print("\n...Done   Press Ctrl-C to close connection.")
             while True:
                 sleep(1)
-        else:
-            print("\n...Done   i will now close connection")
 
     except socket.error as msg:
         print("ERROR: failed to play: %r", msg)
@@ -137,8 +148,8 @@ def parseCmdArgs(argv):
                     dest_addr:  <Destination address for play mode>,
                     router:     <router IP address to accept or spoof>
                     loop:       <loop number of interations>
-                    intervall:  <delay between the loopiterations>
-                    ending:     <terminate the tcp-session after sending>
+                    interval:   <delay between the loop iterations>
+                    keep_open:  <don't close the TCP session after play>
                 }
     """
     REQUIRED_ARGS = 3
@@ -149,8 +160,8 @@ def parseCmdArgs(argv):
                  'dest_addr': None,
                  'router': None,
                  'loop': None,
-                 'intervall': None,
-                 'ending': None }
+                 'interval': None,
+                 'keep_open': None }
 
     if (len(argv) < 3):
         print("ERROR: Missing required args")
@@ -158,8 +169,8 @@ def parseCmdArgs(argv):
         sys.exit(1)
 
     try:
-        (opts, args) = getopt.getopt(argv[1:], "hem:p:f:r:d:l:i:",
-                                       ["help", "mode=", "port=", "file=", "router=", "destip=", "loop=", "intervall=", "ending"])
+        (opts, args) = getopt.getopt(argv[1:], "hkm:p:f:r:d:l:i:",
+                                       ["help", "mode=", "port=", "file=", "router=", "destip=", "loop=", "interval=", "keep_open"])
 
         for o, a in opts:
             if o in ("-h", "--help"):
@@ -192,11 +203,11 @@ def parseCmdArgs(argv):
             elif o in ("-l", "--loop"):
                 cmd_args['loop'] = a
 
-            elif o in ("-i", "--intervall"):
-                cmd_args['intervall'] = a
+            elif o in ("-i", "--interval"):
+                cmd_args['interval'] = a
 
-            elif o in ("-e", "--ending"):
-                cmd_args['ending'] = True
+            elif o in ("-k", "--keep-open"):
+                cmd_args['keep_open'] = True
 
             else:
                 usage(argv[0])
@@ -240,9 +251,9 @@ def usage(prog):
     print("OPTIONAL OPTIONS:")
     print("  -h, --help".ljust(30) + "Print this help menu")
     print("  -r, --router".ljust(30) + "Router IP address to accept (record) or spoof (play)")
-    print("  -l, --loop".ljust(30) + "For play mode; Sending endless the bmpdata")
-    print("  -d, --intervall".ljust(30) + "in case of sending endless bmpdata (loop) use this intervall between the sending")
-    print("  -e, --ending".ljust(30) + "with this flag the tcp-session will be terminated after sending the last byte")
+    print("  -l, --loop".ljust(30) + "How many times to process the dump file (play) [default: 1]")
+    print("  -i, --interval".ljust(30) + "Interval between dump file plays (play)")
+    print("  -k, --keep-open".ljust(30) + "Once finished playing, keep the TCP session up (play)")
 
 
 def main():
