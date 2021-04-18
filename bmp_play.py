@@ -65,19 +65,58 @@ def play(cfg):
         sock.connect((cfg['dest_addr'], cfg['port']))
         print("Connected, sending data...")
 
-        with open(cfg['file'], "rb") as f:
+        if cfg['loop'] == None:
+            loopval = 1
+        elif cfg['loop'] == type(int):
+            loopval = int(cfg['loop'])
+        else:
+            loopval = 1
+
+        if cfg['intervall'] == None:
+            delay=0
+        elif cfg['intervall']:
+            delay=int(cfg['intervall'])
+        else:
+            delay=0
+
+
+        if int(cfg['loop']) != 0:
+            print("looping now %s times" % int(cfg['loop']))
+            for val in range(0, int(cfg['loop'])):
+                sys.stdout.write('.')
+                sys.stdout.flush()
+                with open(cfg['file'], "rb") as f:
+                    while True:
+                        data = f.read(1024)
+        
+                        if (not data):
+                            break;
+        
+                        data = sock.sendall(data)
+                sleep(delay)
+
+        else:
+            print("looping now fo ever until signal TERM (loop=%s)" % int(cfg['loop']))
             while True:
-                data = f.read(1024)
-
-                if (not data):
-                    break;
-
-                data = sock.sendall(data)
-                
-        print(" ...Done   press Ctrl-C to close connection")
- 
-        while True:
-           sleep(1)
+                sys.stdout.write('.')
+                sys.stdout.flush()
+                with open(cfg['file'], "rb") as f:
+                    while True:
+                        data = f.read(1024)
+        
+                        if (not data):
+                            break;
+        
+                        data = sock.sendall(data)
+                sleep(delay)
+               
+                    
+        if cfg['ending'] == None:
+            print("\n...Done   press Ctrl-C to close connection")
+            while True:
+                sleep(1)
+        else:
+            print("\n...Done   i will now close connection")
 
     except socket.error as msg:
         print("ERROR: failed to play: %r", msg)
@@ -97,6 +136,9 @@ def parseCmdArgs(argv):
                     file:       <filename to write to or read from>,
                     dest_addr:  <Destination address for play mode>,
                     router:     <router IP address to accept or spoof>
+                    loop:       <loop number of interations>
+                    intervall:  <delay between the loopiterations>
+                    ending:     <terminate the tcp-session after sending>
                 }
     """
     REQUIRED_ARGS = 3
@@ -105,7 +147,10 @@ def parseCmdArgs(argv):
                  'port': None,
                  'filename': None,
                  'dest_addr': None,
-                 'router': None }
+                 'router': None,
+                 'loop': None,
+                 'intervall': None,
+                 'ending': None }
 
     if (len(argv) < 3):
         print("ERROR: Missing required args")
@@ -113,8 +158,8 @@ def parseCmdArgs(argv):
         sys.exit(1)
 
     try:
-        (opts, args) = getopt.getopt(argv[1:], "hm:p:f:r:d:",
-                                       ["help", "mode=", "port=", "file=", "router=", "destip="])
+        (opts, args) = getopt.getopt(argv[1:], "hem:p:f:r:d:l:i:",
+                                       ["help", "mode=", "port=", "file=", "router=", "destip=", "loop=", "intervall=", "ending"])
 
         for o, a in opts:
             if o in ("-h", "--help"):
@@ -143,6 +188,15 @@ def parseCmdArgs(argv):
 
             elif o in ("-d", "--destip"):
                 cmd_args['dest_addr'] = a
+
+            elif o in ("-l", "--loop"):
+                cmd_args['loop'] = a
+
+            elif o in ("-i", "--intervall"):
+                cmd_args['intervall'] = a
+
+            elif o in ("-e", "--ending"):
+                cmd_args['ending'] = True
 
             else:
                 usage(argv[0])
@@ -186,6 +240,9 @@ def usage(prog):
     print("OPTIONAL OPTIONS:")
     print("  -h, --help".ljust(30) + "Print this help menu")
     print("  -r, --router".ljust(30) + "Router IP address to accept (record) or spoof (play)")
+    print("  -l, --loop".ljust(30) + "For play mode; Sending endless the bmpdata")
+    print("  -d, --intervall".ljust(30) + "in case of sending endless bmpdata (loop) use this intervall between the sending")
+    print("  -e, --ending".ljust(30) + "with this flag the tcp-session will be terminated after sending the last byte")
 
 
 def main():
