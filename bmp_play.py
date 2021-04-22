@@ -33,7 +33,7 @@ def record(cfg):
             print("Connected: ", addr)
 
             if (cfg['router'] and not addr[0] == cfg['router']):
-                print(" ... router does not equal %s, skipping", addr[0])
+                print(" ... router does not equal %s, skipping" % addr[0])
                 conn.close()
                 continue
 
@@ -51,7 +51,7 @@ def record(cfg):
 
 
     except socket.error as msg:
-        print("ERROR: failed to record: %r", msg)
+        print("ERROR: failed to record: %r" % msg)
 
 def play(cfg):
     """ Play BMP messages by sending recorded BMP stream from file to destip/port """
@@ -62,11 +62,11 @@ def play(cfg):
         elif cfg['loop']:
             loopval = int(cfg['loop'])
 
-	    if (loopval < 0):
+            if (loopval < 0):
                 print("ERROR: Invalid 'loop' value")
                 sys.exit(3)
 
-	    if (loopval == 0 and cfg['keep_open']):
+            if (loopval == 0 and cfg['keep_open']):
                 print("ERROR: 'keep_open' does not apply to infinite 'loop' value")
                 sys.exit(3)
         else:
@@ -77,7 +77,7 @@ def play(cfg):
         elif cfg['interval']:
             interval = int(cfg['interval'])
 
-	    if (interval < 0):
+            if (interval < 0):
                 print("ERROR: Invalid 'interval' value")
                 sys.exit(3)
         else:
@@ -130,7 +130,7 @@ def play(cfg):
                 sleep(1)
 
     except socket.error as msg:
-        print("ERROR: failed to play: %r", msg)
+        print("ERROR: failed to play: %r" % msg)
             
 
 def parseCmdArgs(argv):
@@ -182,7 +182,7 @@ def parseCmdArgs(argv):
                 if (a in ['record', 'play']):
                     cmd_args['mode'] = a
                 else:
-                    print("ERROR: Invalid mode of '%s", a)
+                    print("ERROR: Invalid mode '%s'" % a)
                     usage(argv[0])
                     sys.exit(1)
 
@@ -214,7 +214,7 @@ def parseCmdArgs(argv):
                 sys.exit(1)
 
         if (found_req_args < REQUIRED_ARGS):
-            print("ERROR: Missing required args, found %d required %d", found_req_args, REQUIRED_ARGS)
+            print("ERROR: Missing required args, found %d required %d" % (found_req_args, REQUIRED_ARGS))
             usage(argv[0])
             sys.exit(1)
 
@@ -227,7 +227,7 @@ def parseCmdArgs(argv):
         return cmd_args
 
     except (getopt.GetoptError, TypeError) as err:
-        print("%s", str(err)) # will print something like "option -a not recognized"
+        print("%s" % str(err)) # will print something like "option -a not recognized"
         usage(argv[0])
         sys.exit(2)
 
@@ -238,14 +238,14 @@ def usage(prog):
         :param prog:  Program name
     """
     print("")
-    print("Usage: %s [OPTIONS]", prog)
+    print("Usage: %s [OPTIONS]" % prog)
     print("")
 
     print("REQUIRED OPTIONS:")
     print("  -m, --mode".ljust(30) + "Either 'record' or 'play'")
     print("  -p, --port".ljust(30) + "TCP Port to listen on or to send to")
     print("  -f, --file".ljust(30) + "Filename to write to or read from")
-    print("  -d, --destip".ljust(30) + "For play mode; Destination IP address of collector")
+    print("  -d, --destip".ljust(30) + "Destination IP address of collector (play)")
     print("")
 
     print("OPTIONAL OPTIONS:")
@@ -267,7 +267,7 @@ def main():
         record(cfg)
 
     elif (cfg['mode'] == 'play'):
-        print("Sending contents of '%s' to connection to %s", cfg['file'], cfg['dest_addr'])
+        print("Sending contents of '%s' to %s" % (cfg['file'], cfg['dest_addr']))
         play(cfg)
 
 
