@@ -92,9 +92,9 @@ def play(cfg):
         sock.connect((cfg['dest_addr'], cfg['port']))
         print("Connected, sending data...")
 
-        if int(cfg['loop']) != 0:
-            print("Looping %s times over input file" % int(cfg['loop']))
-            for val in range(0, int(cfg['loop'])):
+        if loopval != 0:
+            print("Looping %s times over input file" % loopval)
+            for val in range(0, loopval):
                 sys.stdout.write('.')
                 sys.stdout.flush()
                 with open(cfg['file'], "rb") as f:
