@@ -4,7 +4,7 @@ very useful for devloping around the protocol.
 
 Originally part of OpenBMP dev tools, it eventually disappeared from
 the known cyber space. The idea is to make this tool public again for
-the community to enjoy and improve. 
+the community to enjoy and improve.
 
 To record: `bmp_play.py -m record -p 1790 -f bmp.dump`
 
@@ -16,3 +16,9 @@ To replay: `bmp_play.py -m play -p 1790 -f bmp.dump -d 127.0.0.1`
 
 - Replay a dump forever with 120 secs delay between the plays:
   * `bmp_play.py -m play -p 1790 -f bmp.dump -d 127.0.0.1 -l 0 -i 120`
+
+# bmp_filter
+A small utility, written in Python, to filter pre-recorded BMP packets
+by BMP message type.
+
+`bmp_filter.py -i /path/to/file.bmp -o /path/to/output/file.bmp --statistics-report --peer-down --peer-up --initiation`
