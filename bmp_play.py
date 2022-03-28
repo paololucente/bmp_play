@@ -75,7 +75,7 @@ def play(cfg):
         if cfg['interval'] == None:
             interval = 0
         elif cfg['interval']:
-            interval = int(cfg['interval'])
+            interval = float(cfg['interval'])
 
             if (interval < 0):
                 print("ERROR: Invalid 'interval' value")
@@ -85,7 +85,7 @@ def play(cfg):
 
         sock =  socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        # spoof a router addr if requested, use "net.ipv4.ip_nonlocal_bind=1" as needed 
+        # spoof a router addr if requested, use "net.ipv4.ip_nonlocal_bind=1" as needed
         if (cfg['router']):
             sock.bind((cfg['router'], 0))
 
@@ -100,10 +100,10 @@ def play(cfg):
                 with open(cfg['file'], "rb") as f:
                     while True:
                         data = f.read(1024)
-        
+
                         if (not data):
                             break;
-        
+
                         data = sock.sendall(data)
                 sleep(interval)
 
@@ -115,13 +115,13 @@ def play(cfg):
                 with open(cfg['file'], "rb") as f:
                     while True:
                         data = f.read(1024)
-        
+
                         if (not data):
                             break;
-        
+
                         data = sock.sendall(data)
                 sleep(interval)
-                    
+
         if cfg['keep_open'] == None:
             print("\n...Done   Closing connection.")
         else:
@@ -131,7 +131,7 @@ def play(cfg):
 
     except socket.error as msg:
         print("ERROR: failed to play: %r" % msg)
-            
+
 
 def parseCmdArgs(argv):
     """ Parse commandline arguments
@@ -218,7 +218,7 @@ def parseCmdArgs(argv):
             usage(argv[0])
             sys.exit(1)
 
-        elif (cmd_args['mode'] == 'play'): 
+        elif (cmd_args['mode'] == 'play'):
             if (cmd_args['dest_addr'] == None):
                 print("ERROR: play mode requires destination IP arg")
                 usage(argv[0])
